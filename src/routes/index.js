@@ -2,8 +2,13 @@ const express = require('express');
 const path = require('path');
 const ProductService = require('../services');
 const receipt = '../assets/receipt.pdf'
+const passport = require('passport');
+
+require('../utils/auth/strategies/jwt');
 
 const platziStore = (app) => {
+
+  
   const router = express.Router();
   app.use('/api/', router);
 
@@ -29,14 +34,14 @@ const platziStore = (app) => {
     res.status(200).json(storeProducts);
   });
 
-  router.put('/products/:id', async (req, res, next) => {
+  router.put('/products/:id',passport.authenticate('jwt',{session:false}), async ({user,scopes},req, res, next) => {
     const { id } = req.params
     const { body: product } = req
     const storeProducts = await productService.updateProductById({ id, ...product })
     res.status(200).json(storeProducts);
   });
 
-  router.delete('/products/:id', async (req, res, next) => {
+  router.delete('/products/:id',passport.authenticate('jwt',{session:false}), async ({user,scopes},req, res, next) => {
     const { id } = req.params
     const storeProducts = await productService.deleteProductById(id)
     res.status(200).json(storeProducts);
